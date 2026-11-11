@@ -2,11 +2,163 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>Мій перший сайт</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мій To-Do List</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #1e1e24;
+            color: white;
+            display: flex;
+            justify-content: center;
+            padding-top: 50px;
+            margin: 0;
+        }
+        .container {
+            background: #2d2d35;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            margin-top: 0;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+        }
+        button#addBtn {
+            padding: 10px 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+        button#addBtn:hover { background: #45a049; }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        li {
+            background: #3e3e46;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        li:hover { background: #4a4a54; }
+        li.completed span {
+            text-decoration: line-through;
+            color: #888;
+        }
+        .delete-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .delete-btn:hover { background: #d32f2f; }
+    </style>
 </head>
-<body style="background: #222; color: white; text-align: center; padding-top: 50px; font-family: Arial;">
-    <h1 style="color: #4CAF50;">Привіт! Це мій сайт! 👋</h1>
-    <p>Я створив його на GitHub.</p>
-    <button style="padding: 10px 20px; font-size: 16px; cursor: pointer;" onclick="alert('Ура! Кнопка працює!')">Натисни мене</button>
+<body>
+    <div class="container">
+        <h1>Мої справи 📝</h1>
+        <div class="input-group">
+            <input type="text" id="taskInput" placeholder="Що треба зробити?">
+            <button id="addBtn" onclick="addTask()">Додати</button>
+        </div>
+        <ul id="taskList">
+            <!-- Сюди будуть додаватися завдання -->
+        </ul>
+    </div>
+
+    <script>
+        // Завантажуємо збережені завдання з пам'яті браузера
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+        function renderTasks() {
+            const list = document.getElementById('taskList');
+            list.innerHTML = '';
+            
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                if (task.completed) li.classList.add('completed');
+
+                const span = document.createElement('span');
+                span.textContent = task.text;
+                span.onclick = () => toggleTask(index);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '❌';
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation(); // Щоб не спрацьовував клік по всьому рядку
+                    deleteTask(index);
+                };
+
+                li.appendChild(span);
+                li.appendChild(deleteBtn);
+                list.appendChild(li);
+            });
+        }
+
+        function addTask() {
+            const input = document.getElementById('taskInput');
+            const text = input.value.trim();
+            if (text !== '') {
+                tasks.push({ text: text, completed: false });
+                input.value = '';
+                saveAndRender();
+            }
+        }
+
+        function toggleTask(index) {
+            tasks[index].completed = !tasks[index].completed; // Ставимо/знімаємо галочку
+            saveAndRender();
+        }
+
+        function deleteTask(index) {
+            tasks.splice(index, 1); // Видаляємо завдання
+            saveAndRender();
+        }
+
+        function saveAndRender() {
+            localStorage.setItem('tasks', JSON.stringify(tasks)); // Зберігаємо в пам'ять
+            renderTasks();
+        }
+
+        // Дозволяємо додавати завдання натисканням клавіші Enter на клавіатурі
+        document.getElementById('taskInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                addTask();
+            }
+        });
+
+        renderTasks(); // Показуємо завдання при завантаженні
+    </script>
 </body>
-</html>
+    </html>
